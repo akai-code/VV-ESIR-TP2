@@ -23,3 +23,57 @@ Use your rule with different projects and describe you findings below. See the [
 
 ## Answer
 
+**Rule development process**
+
+1-Write a code snippet in the main editor that features the offending code you’re looking for
+
+class Akai {
+    public static void main () {
+        int a=1;
+        if ( a < 0 ) {
+            System.out.println("a");
+            for (int i=0 ; i<10;i++) {
+                if (i=2) {
+                    System.out.println("2");
+                    for (int i=0 ; i<10;i++) {
+                        if (i=4) {
+                             System.out.println("4");
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+2-Examine the AST and determine what node the violation should be reported on
+
+    last Ifstatement : if (i=4)
+
+3-Write an XPath expression matching that node in the XPath editor
+
+//IfStatement[ancestor::IfStatement[ancestor::IfStatement]]
+
+4-Export your XPath expression to an XML rule element, and place it in your ruleset
+
+<rule name="ComplexIfStatement"
+      language="java"
+      message="Complex If Statement"
+      class="net.sourceforge.pmd.lang.rule.XPathRule">
+   <description>
+      detect the use of three or more nested if statements in
+      Java programs
+   </description>
+   <priority>3</priority>
+   <properties>
+      <property name="version" value="2.0"/>
+      <property name="xpath">
+         <value>
+<![CDATA[
+//IfStatement[ancestor::IfStatement[ancestor::IfStatement]]
+]]>
+         </value>
+      </property>
+   </properties>
+</rule>
+
