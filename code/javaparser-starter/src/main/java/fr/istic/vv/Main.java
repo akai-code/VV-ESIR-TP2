@@ -1,19 +1,23 @@
 package fr.istic.vv;
 
-import com.github.javaparser.Problem;
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.visitor.VoidVisitor;
-import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import com.github.javaparser.utils.SourceRoot;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
 
 public class Main {
+    //Chaine contenant l'erreur
+    private static String errorStr;
+
+    //Retourne l'ensemble des erreurs 
+	public static void addErrorStr(String error) {
+		if(errorStr == null) {
+			errorStr = new String();
+		}
+		errorStr += error +"\n";
+	}
 
     public static void main(String[] args) throws IOException {
         if(args.length == 0) {
@@ -27,13 +31,19 @@ public class Main {
             System.exit(2);
         }
 
+
+        FileWriter output = new FileWriter("output.txt");
+        NoGetter app = new NoGetter();
+
         SourceRoot root = new SourceRoot(file.toPath());
         PublicElementsPrinter printer = new PublicElementsPrinter();
         root.parse("", (localPath, absolutePath, result) -> {
             result.ifSuccessful(unit -> unit.accept(printer, null));
             return SourceRoot.Callback.Result.DONT_SAVE;
-        });
+        }); 
+        app.compare(printer.getData());
+        output.write(errorStr);
+        output.close(); 
     }
-
-
 }
+
